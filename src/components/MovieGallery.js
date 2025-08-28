@@ -27,11 +27,7 @@ const MovieGallery = ({ movies }) => {
   }, [movies, currentIndex]);
 
   // Helper to handle both absolute and relative URLs
-const getFullUrl = (url) => {
-  if (!url) return "";
-  return url.startsWith("http") ? url : `${process.env.REACT_APP_API_URL}/images/${url}`;
-};
-
+    const getFullUrl = (url) => url || "";
 
   return (
     <div className="movie-gallery" style={{ backgroundColor: "#141414" }}>
@@ -95,7 +91,7 @@ const getFullUrl = (url) => {
           {/* Thumbnails Row */}
           <div style={{ padding: "1rem 2rem" }}>
             <h2 style={{ color: "white", marginBottom: "1rem" }}>
-              Popular on Netflix
+             
             </h2>
             <div
               className="thumbnails-row"
