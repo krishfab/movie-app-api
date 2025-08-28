@@ -82,27 +82,32 @@ export default function AdminDashboard() {
   };
 
   // Update movie
-  const handleUpdateMovie = async () => {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/updateMovie/${currentMovie._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({ title, director, year, genre, description, posterUrl }),
-      });
-      if (!res.ok) throw new Error("Failed to update movie");
-      const updatedMovies = movies.map((m) =>
-        m._id === currentMovie._id ? { ...m, title, director, year, genre, description, posterUrl } : m
-      );
-      setMovies(updatedMovies);
-      setShowModal(false);
-      alert("Movie updated!");
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+const handleUpdateMovie = async () => {
+  if (!currentMovie) return;
+
+  try {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/movies/updateMovie/${currentMovie._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
+      },
+      body: JSON.stringify({ title, director, year, genre, description, posterUrl }),
+    });
+
+    if (!res.ok) throw new Error("Failed to update movie");
+    const updatedMovie = await res.json();
+
+    // Update state
+    setMovies(movies.map((m) => (m._id === updatedMovie._id ? updatedMovie : m)));
+
+    setShowModal(false);
+    alert("Movie updated!");
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
 
   // Delete movie
   const handleDeleteMovie = async (id) => {
