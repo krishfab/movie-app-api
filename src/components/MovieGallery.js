@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { FaPlay, FaInfoCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; 
 
 
 const MovieGallery = ({ movies }) => {
   const [featuredMovie, setFeaturedMovie] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+   const navigate = useNavigate();
 
   // Set the first movie as featured once movies are loaded
   useEffect(() => {
@@ -29,7 +31,7 @@ const MovieGallery = ({ movies }) => {
   // Helper to handle both absolute and relative URLs
     const getFullUrl = (url) => url || "";
 
-  return (
+   return (
     <div className="movie-gallery" style={{ backgroundColor: "#141414" }}>
       {featuredMovie ? (
         <>
@@ -82,6 +84,7 @@ const MovieGallery = ({ movies }) => {
                   borderRadius: "4px",
                   cursor: "pointer",
                 }}
+                onClick={() => navigate(`/movies/${featuredMovie._id}`)}
               >
                 <FaInfoCircle /> More Info
               </button>
@@ -90,9 +93,6 @@ const MovieGallery = ({ movies }) => {
 
           {/* Thumbnails Row */}
           <div style={{ padding: "1rem 2rem" }}>
-            <h2 style={{ color: "white", marginBottom: "1rem" }}>
-             
-            </h2>
             <div
               className="thumbnails-row"
               style={{
@@ -120,8 +120,12 @@ const MovieGallery = ({ movies }) => {
                     transition: "transform 0.3s",
                     border: idx === currentIndex ? "2px solid white" : "none",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.1)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
                 />
               ))}
             </div>

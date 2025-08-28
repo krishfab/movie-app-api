@@ -181,4 +181,55 @@
   white-space: normal;   /* allow wrapping to new lines */
 }
 
+/* TOP PICK SECTION */
+
+/* TOP PICK SECTION */
+.top-pick-section {
+  padding: 2rem;
+  background: linear-gradient(135deg, #1b2b40, #0d1b2a); /* gradient background */
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.top-pick-content {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  align-items: stretch; /* all cards same height */
+}
+
+.top-pick-item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.07); /* slightly brighter glass look */
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+}
+
+.top-pick-item:hover {
+  transform: translateY(-5px); /* hover lift */
+}
+
+.top-pick-item img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.top-pick-item-title {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  text-align: center;
+  color: #fff;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+
 

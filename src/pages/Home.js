@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MovieGallery from "../components/MovieGallery"; 
-import TrendingSection from "../components/TrendingSection"; // ✅ import TrendingSection
+import TrendingSection from "../components/TrendingSection"; 
+import TopPickSection from "../components/TopPickSection";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -25,6 +26,14 @@ const Home = () => {
       {movies.length > 1 && (
         <TrendingSection 
           movies={movies.slice(1)}  // exclude featured movie
+          onSelect={setSelectedMovie} 
+        />
+      )}
+
+       {/* Top Pick Section */}
+      {movies.length > 0 && (
+        <TopPickSection 
+          movies={movies.slice(0, 5)}  // first 5 as top picks
           onSelect={setSelectedMovie} 
         />
       )}

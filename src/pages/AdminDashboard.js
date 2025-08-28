@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
-import { Badge, Button, Table, Modal, Form } from "react-bootstrap";
+import { Button, Table, Modal, Form } from "react-bootstrap";
 
 export default function AdminDashboard() {
   const { user } = useContext(UserContext);
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [currentMovie, setCurrentMovie] = useState(null);
 
-    // Wait until user is loaded
+  // Wait until user is loaded
   useEffect(() => {
     if (user && !user.isAdmin) {
       alert("Access denied. Admins only.");
@@ -30,20 +30,23 @@ export default function AdminDashboard() {
     }
   }, [user, navigate]);
 
-  // Fetch all movies
+  // Function to fetch all movies
+  const fetchAllMovies = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/movies/getMovie`);
+      const data = await res.json();
+      setMovies(data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch all movies on mount
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/movies/getMovie`);
-        const data = await res.json();
-        setMovies(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMovies();
+    fetchAllMovies();
   }, []);
 
   // Add movie
@@ -58,12 +61,20 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({ title, director, year, genre, description, posterUrl }),
       });
+
       if (!res.ok) throw new Error("Failed to add movie");
-      const data = await res.json();
+      await res.json(); // no need to push manually
+
       alert("Movie added successfully!");
-      setMovies([...movies, data.result]);
+      fetchAllMovies(); // Refresh movies list
+
       // Reset form
-      setTitle(""); setDirector(""); setYear(""); setGenre(""); setDescription(""); setPosterUrl("");
+      setTitle("");
+      setDirector("");
+      setYear("");
+      setGenre("");
+      setDescription("");
+      setPosterUrl("");
     } catch (err) {
       alert(err.message);
     }
@@ -71,43 +82,41 @@ export default function AdminDashboard() {
 
   // Open modal for update
   const openUpdateModal = (movie) => {
+    if (!movie) return;
     setCurrentMovie(movie);
-    setTitle(movie.title);
-    setDirector(movie.director);
-    setYear(movie.year);
-    setGenre(movie.genre);
-    setDescription(movie.description);
-    setPosterUrl(movie.posterUrl);
+    setTitle(movie.title || "");
+    setDirector(movie.director || "");
+    setYear(movie.year || "");
+    setGenre(movie.genre || "");
+    setDescription(movie.description || "");
+    setPosterUrl(movie.posterUrl || "");
     setShowModal(true);
   };
 
   // Update movie
-const handleUpdateMovie = async () => {
-  if (!currentMovie) return;
+  const handleUpdateMovie = async () => {
+    if (!currentMovie) return;
 
-  try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/movies/updateMovie/${currentMovie._id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
-      },
-      body: JSON.stringify({ title, director, year, genre, description, posterUrl }),
-    });
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/movies/updateMovie/${currentMovie._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ title, director, year, genre, description, posterUrl }),
+      });
 
-    if (!res.ok) throw new Error("Failed to update movie");
-    const updatedMovie = await res.json();
+      if (!res.ok) throw new Error("Failed to update movie");
+      await res.json();
 
-    // Update state
-    setMovies(movies.map((m) => (m._id === updatedMovie._id ? updatedMovie : m)));
-
-    setShowModal(false);
-    alert("Movie updated!");
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
+      alert("Movie updated!");
+      setShowModal(false);
+      fetchAllMovies(); // Refresh movies list
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   // Delete movie
   const handleDeleteMovie = async (id) => {
@@ -118,15 +127,19 @@ const handleUpdateMovie = async () => {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       if (!res.ok) throw new Error("Failed to delete movie");
-      setMovies(movies.filter((m) => m._id !== id));
+
       alert("Movie deleted!");
+      fetchAllMovies(); // Refresh movies list
     } catch (err) {
       alert(err.message);
     }
   };
 
   return (
-    <div className="admin-dashboard" style={{ padding: "2rem", backgroundColor: "#0d1b2a", minHeight: "100vh", color: "#fff" }}>
+    <div
+      className="admin-dashboard"
+      style={{ padding: "2rem", backgroundColor: "#0d1b2a", minHeight: "100vh", color: "#fff" }}
+    >
       <h2 className="mb-4">Admin Dashboard</h2>
 
       {/* Add Movie Form */}
@@ -155,7 +168,9 @@ const handleUpdateMovie = async () => {
 
       {/* Movies Table */}
       <h4>Existing Movies</h4>
-      {loading ? <p>Loading movies...</p> :
+      {loading ? (
+        <p>Loading movies...</p>
+      ) : (
         <Table striped bordered hover variant="dark">
           <thead>
             <tr>
@@ -167,12 +182,12 @@ const handleUpdateMovie = async () => {
             </tr>
           </thead>
           <tbody>
-            {movies.map((movie) => (
+            {movies.filter(Boolean).map((movie) => (
               <tr key={movie._id}>
-                <td>{movie.title}</td>
-                <td>{movie.director}</td>
-                <td>{movie.year}</td>
-                <td>{movie.genre}</td>
+                <td>{movie?.title || "N/A"}</td>
+                <td>{movie?.director || "N/A"}</td>
+                <td>{movie?.year || "N/A"}</td>
+                <td>{movie?.genre || "N/A"}</td>
                 <td>
                   <Button size="sm" variant="warning" className="me-2" onClick={() => openUpdateModal(movie)}>Update</Button>
                   <Button size="sm" variant="danger" onClick={() => handleDeleteMovie(movie._id)}>Delete</Button>
@@ -181,7 +196,7 @@ const handleUpdateMovie = async () => {
             ))}
           </tbody>
         </Table>
-      }
+      )}
 
       {/* Update Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -218,3 +233,4 @@ const handleUpdateMovie = async () => {
     </div>
   );
 }
+
