@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaPlay, FaInfoCircle } from "react-icons/fa";
 
-const API_URL = "http://localhost:4000";
 
 const MovieGallery = ({ movies }) => {
   const [featuredMovie, setFeaturedMovie] = useState(null);
